@@ -1,9 +1,14 @@
+import os
+
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def send_email(recipient, subject, body):
-    api_key = "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"
+    api_key = os.environ.get("SENDGRID_API_KEY")
     sender = "zxfrankgt@gmail.com"
 
     message = Mail(
@@ -27,5 +32,3 @@ def send_email(recipient, subject, body):
 #     print(f"Body: {body}")
 #     print("------------------------")
 #     return recipient
-
-# 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
