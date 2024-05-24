@@ -6,6 +6,18 @@ This is a Lead Management application built with FastAPI and SQLite. It allows y
 
 - Python 3.8 or higher
 - pip (Python package installer)
+- SendGrid API key
+
+### Create API key
+1. Sign up for a SendGrid account:
+Go to the SendGrid website (https://sendgrid.com) and sign up for an account.
+2. Create an API key:
+- After signing up and logging in to your SendGrid account, navigate to the "Settings" section.
+- Click on "API Keys" in the left sidebar.
+- Click on the "Create API Key" button.
+- Set your API key name and permissions.
+- Click on "Create & View" to generate the API key.
+- Copy the generated API key and store it securely.
 
 ## Installation
 
@@ -14,6 +26,7 @@ This is a Lead Management application built with FastAPI and SQLite. It allows y
 3. Create a virtual environment if you want to: `python3 -m venv venv`
 4. Activate the virtual environment: `source venv/bin/activate`
 5. Install the required dependencies: `pip install -r requirements.txt`
+6. Create a new file named `.env` in the project root directory. Open the `.env` file and add the following code:`SENDGRID_API_KEY=<your-sendgrid-api-key>`
 
 ## Running the Application
 To run the application, use the following command:
