@@ -27,6 +27,7 @@ Go to the SendGrid website (https://sendgrid.com) and sign up for an account.
 4. Activate the virtual environment: `source venv/bin/activate`
 5. Install the required dependencies: `pip install -r requirements.txt`
 6. Create a new file named `.env` in the project root directory. Open the `.env` file and add the following code:`SENDGRID_API_KEY=<your-sendgrid-api-key>`
+7. In `email.py`, replace the sender email to your SendGrid account.
 
 ## Running the Application
 To run the application, use the following command:
