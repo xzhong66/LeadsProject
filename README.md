@@ -27,24 +27,18 @@ The application will start running at http://localhost:8000.
 - `GET /leads/{lead_id}`: Retrieve a specific lead by ID (requires authentication).
 - `PATCH /leads/{lead_id}`: Update the state of a lead (requires authentication).
 - `POST /leads/login`: Generate a JWT token for authentication.
+- `GET leads/resumes/{resume_filename}`: Get the resume by file name.
 
 ## Testing the API Endpoints
 I use Postman to test the APIs.
 
 ### Create a lead
 1. Set the URL to `http://localhost:8000/leads`.
-2. Select the "Body" tab and choose the "raw" format.
-3. Set the content type to "JSON" in the dropdown menu.
-4. Enter the following JSON payload in the request body:
-``` json
-{
-    "first_name": "your firsr name",
-    "last_name": "your last name",
-    "email": "your email",
-    "resume": "your resume contents"
-}
-```
+2. Select the "Body" tab and choose the "form-data" format.
+3. Add four key-value pairs: "first_name" with the value, "last_name" with the value, "email" with the value and "resume" with a file upload. 
+4. Select `File` as the field type for "resume" then upload the file you choose.
 5. Send the **POST** request and verify that you receive a 201 Created response with the created lead data.
+6. Additionally, you should expect to see the email sending status code to be 202 and receive an email in a while.
 
 ### Log in
 1. Set URL to `http://localhost:8000/leads/login`.
@@ -76,6 +70,13 @@ I hard coded these values in the code. It should be improved with a sign-up mech
 ```
 6. Send the **PATCH** request and verify that you receive a 200 OK response with the updated lead data.
 
-## Fake email sending
-The application is currently configured to use fake email sending, which means that instead of sending real emails, it will print the email details in the console.
-To view the email logs, check the console output when creating a new lead. For real world implementations, we can leverage third party email services like Twilio's SendGrid.
+### Get resume by file name
+1. Set the URL to `http://localhost:8000/leads/resumes/{resume_filename}`, replacing {resume_filename} with the actual filename of a resume you want to retrieve. Make sure that the file name exists in `resumes` directory.
+2. Select the "Authorization" tab and choose "Bearer Token" from the dropdown menu.
+3. Paste the JWT token in the "Token" field.
+4. Send the **GET** request and verify that you now receive a 200 OK response along with the resume file.
+5. P.S. To avoid duplicating resume file names, I added UUID prefix for each file uploaded.
+
+## Email Notification
+The application is currently configured to use Twilio's SendGrid for email sending activity. The email delivery will take some time as SendGrid process the request.
+As I tested so far, I'm able to see all the email related activities from SendGrid's dashboard. 

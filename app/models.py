@@ -11,6 +11,6 @@ class Lead(Base):
     first_name = Column(String(50), nullable=False)
     last_name = Column(String(50), nullable=False)
     email = Column(String(120), nullable=False, unique=True)
-    resume = Column(Text, nullable=False)
+    resume_path = Column(String(50), nullable=False)
     state = Column(String(20), nullable=False, default="PENDING")
     created_at = Column(DateTime, default=func.now())

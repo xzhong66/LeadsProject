@@ -1,19 +1,15 @@
-from typing import Optional
-
 from pydantic import BaseModel
 from datetime import datetime
 
 
-# data models for request and response
 class LeadBase(BaseModel):
     first_name: str
     last_name: str
     email: str
-    resume: str
 
 
 class LeadCreate(LeadBase):
-    pass
+    resume: str
 
 
 class LeadUpdate(BaseModel):
@@ -22,9 +18,9 @@ class LeadUpdate(BaseModel):
 
 class Lead(LeadBase):
     id: int
+    resume_path: str
     state: str
     created_at: datetime
 
     class Config:
         orm_mode = True
-

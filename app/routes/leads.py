@@ -1,13 +1,15 @@
+import os
+import uuid
 from datetime import timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from typing import List
 
-from ..schemas import LeadCreate, LeadUpdate, Lead
+from ..schemas import LeadUpdate, Lead
 from ..models import Lead as LeadModel
 from ..database import get_db
 from ..auth import get_current_user, ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token
@@ -24,18 +26,49 @@ class Token(BaseModel):
     token_type: str
 
 
+print("API started")
+
+
 # create new lead and save to db
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=Lead)
-async def create_lead(lead: LeadCreate, db: Session = Depends(get_db)):
-    # Create a new lead instance
-    try:
-        db_lead = LeadModel(**lead.dict())
-        db.add(db_lead)
-        db.commit()
-        db.refresh(db_lead)
-    except IntegrityError:
-        db.rollback()
+async def create_lead(request: Request, db: Session = Depends(get_db)):
+    print("Received request")
+
+    # Get the form data
+    form_data = await request.form()
+    first_name = form_data.get("first_name")
+    last_name = form_data.get("last_name")
+    email = form_data.get("email")
+    resume = form_data.get("resume")
+
+    # Check if the email already exists in the database
+    existing_lead = db.query(LeadModel).filter(LeadModel.email == email).first()
+    if existing_lead:
         raise HTTPException(status_code=400, detail="Email address already exists")
+
+    # Save the resume file
+    resume_filename = f"{uuid.uuid4().hex}_{resume.filename}"
+    resume_path = f"resumes/{resume_filename}"
+
+    print("Resume path is:" + resume_path)
+
+    if not os.path.exists(resume_path):
+        # Create the directory if it doesn't exist
+        os.makedirs(os.path.dirname(resume_path), exist_ok=True)
+
+    with open(resume_path, "wb") as file:
+        contents = await resume.read()
+        file.write(contents)
+
+    db_lead = LeadModel(
+        first_name=first_name,
+        last_name=last_name,
+        email=email,
+        resume_path=resume_path
+    )
+    db.add(db_lead)
+    db.commit()
+    db.refresh(db_lead)
 
     # Send email notifications
     prospect_email = send_email(
@@ -108,3 +141,12 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+@router.get("/resumes/{resume_filename}")
+async def get_resume(resume_filename: str, current_user: str = Depends(get_current_user)):
+    # Only authenticated attorneys can access this route
+    if current_user != "attorney@company.com":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to access resumes")
+    resume_path = f"resumes/{resume_filename}"
+    return FileResponse(resume_path)
